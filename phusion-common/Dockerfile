@@ -9,11 +9,16 @@ ENV		WEB_ROOT	/www/htdocs
 EXPOSE	80
 VOLUME	/www/htdocs
 WORKDIR	/www
+SHELL	["/bin/bash", "-c"]
 CMD		/sbin/my_init
 
-# install packaged dependencies
 RUN		DEBIAN_FRONTEND=noninteractive \
 
+# source helper functions
+&&		bash <(curl -s https://raw.githubusercontent.com/davidhiendl/docker-helpers/master/install-bash.sh) \
+&&		source /usr/local/docker-helpers.sh \
+
+# install packaged dependencies
 &&		add-apt-repository ppa:ondrej/php \
 &&		apt-get update \
 &&		apt-get install -y \
@@ -54,17 +59,12 @@ ADD		init.d		/etc/my_init.d
 ADD		php-fpm		"/etc/php/${PHP_VERSION}/fpm/"
 ADD		nginx		/etc/nginx/
 
-		# fill in php version
-RUN		envsubst \
-			'${PHP_VERSION}' \
-			< /etc/php/${PHP_VERSION}/fpm/php-fpm.conf \
-			> /etc/php/${PHP_VERSION}/fpm/php-fpm.conf \
-&&		envsubst \
-			'${PHP_VERSION}' \
-			< /etc/service/php-fpm/run \
-			> /etc/service/php-fpm/run \
+# fill in php version
+RUN		source /usr/local/docker-helpers.sh \
+&&		envsubst_inplace '${PHP_VERSION}' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf \
+&&		envsubst_inplace '${PHP_VERSION}' /etc/service/php-fpm/run \
 
-		# update permissions
+# update permissions
 &&		chmod 555 \
 		/etc/my_init.d/* \
 		/etc/service/nginx/* \
