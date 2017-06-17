@@ -1,5 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-php-fpm7.1
