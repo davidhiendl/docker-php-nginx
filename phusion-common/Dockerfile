@@ -5,9 +5,9 @@ ARG		PHP_VERSION
 
 ENV		WEB_HOME	/www
 ENV		WEB_ROOT	/www/htdocs
+ENV		PHP_VERSION	${PHP_VERSION}
 
 EXPOSE	80
-VOLUME	/www/htdocs
 WORKDIR	/www
 SHELL	["/bin/bash", "-c"]
 CMD		/sbin/my_init
@@ -41,6 +41,9 @@ RUN		DEBIAN_FRONTEND=noninteractive \
 
 # remove default nginx site
 &&		rm /etc/nginx/sites-enabled/* \
+
+# symlink php version to current
+&&		ln -s /etc/php/${PHP_VERSION} /etc/php/cur \
 
 # configure php-fpm
 &&		cd "/etc/php/${PHP_VERSION}/fpm" \
