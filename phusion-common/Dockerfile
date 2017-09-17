@@ -1,17 +1,20 @@
 FROM		phusion/baseimage:0.9.22
-MAINTAINER	David Hiendl <david.hiendl@dhswt.de>
+LABEL 	maintainer="David Hiendl <david.hiendl@dhswt.de>" \
+				com.datadoghq.sd.check.id="dhswt-php-nginx"
 
-ARG		PHP_VERSION
+# variables
+ARG			PHP_VERSION
+ENV			WEB_HOME="/www" \
+				WEB_ROOT="/www/htdocs" \
+				PHP_VERSION="${PHP_VERSION}"
 
-ENV		WEB_HOME	/www
-ENV		WEB_ROOT	/www/htdocs
-ENV		PHP_VERSION	${PHP_VERSION}
-
-EXPOSE	80
+# run config
+EXPOSE	80 8888
 WORKDIR	/www
-SHELL	["/bin/bash", "-c"]
-CMD		/sbin/my_init
+SHELL		["/bin/bash", "-c"]
+CMD			/sbin/my_init
 
+# start install process
 RUN		DEBIAN_FRONTEND=noninteractive \
 
 # source helper functions
@@ -27,7 +30,7 @@ RUN		DEBIAN_FRONTEND=noninteractive \
 			wget \
 			"php${PHP_VERSION}-fpm" \
 			"php${PHP_VERSION}-opcache" \
-			
+
 # clean up cache
 &&		apt-get clean \
 &&		rm -rf \
@@ -49,18 +52,14 @@ RUN		DEBIAN_FRONTEND=noninteractive \
 &&		cd "/etc/php/${PHP_VERSION}/fpm" \
 &&		mv php-fpm.conf php-fpm.conf.bak \
 
-# keep only active directives
-&&		cat pool.d/www.conf \
-			| grep -v "^;" \
-			| grep -v "^$" \
-			> pool.d/50-www.conf.bak \
-&&		rm pool.d/www.conf
+# remove original config
+&&		mv pool.d/www.conf pool.d/www.conf.bak
 
 # install services, scripts, config
 ADD		services	/etc/service
 ADD		init.d		/etc/my_init.d
-ADD		php-fpm		"/etc/php/${PHP_VERSION}/fpm/"
-ADD		nginx		/etc/nginx/
+ADD		php-fpm	 	"/etc/php/${PHP_VERSION}/fpm/"
+ADD		nginx		 	/etc/nginx/
 
 # fill in php version
 RUN		source /usr/local/docker-helpers.sh \
@@ -69,6 +68,6 @@ RUN		source /usr/local/docker-helpers.sh \
 
 # update permissions
 &&		chmod 555 \
-		/etc/my_init.d/* \
-		/etc/service/nginx/* \
-		/etc/service/php-fpm/*
+				/etc/my_init.d/* \
+				/etc/service/nginx/* \
+				/etc/service/php-fpm/*
