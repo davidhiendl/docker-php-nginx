@@ -5,7 +5,7 @@ docker-image = dhswt/php-nginx
 assemble:
 	exec ./scripts/Makefile-assemble.sh
 
-images: image-5-6-phusion image-7-0-phusion image-7-1-phusion
+images: image-5-6-phusion image-7-0-phusion image-7-1-phusion image-7-2-phusion
 
 image-5-6-phusion:
 	docker build --squash \
@@ -25,7 +25,13 @@ image-7-1-phusion:
 		-t $(docker-image):7.1-phusion \
 		./phusion-common
 
-push: push-5-6-phusion push-7-0-phusion push-7-1-phusion
+image-7-2-phusion:
+	docker build --squash \
+		--build-arg PHP_VERSION=7.2 \
+		-t $(docker-image):7.2-phusion \
+		./phusion-common
+
+push: push-5-6-phusion push-7-0-phusion push-7-1-phusion push-7-2-phusion
 
 push-5-6-phusion:
 	docker push $(docker-image):5.6-phusion 
@@ -35,6 +41,9 @@ push-7-0-phusion:
 
 push-7-1-phusion:
 	docker push $(docker-image):7.1-phusion
+
+push-7-2-phusion:
+	docker push $(docker-image):7.2-phusion
 
 show-images:
 	docker images | grep "$(docker-image)"
