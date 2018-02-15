@@ -1,5 +1,4 @@
-# FROM  phusion/baseimage:0.9.22 # temporarily using custom build base image as it is newer and has some bug fixes
-FROM	dhswt/phusion-baseimage:master
+FROM    phusion/baseimage:0.10.0
 LABEL   maintainer="David Hiendl <david.hiendl@dhswt.de>"
 
 # variables
